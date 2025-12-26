@@ -1,0 +1,19 @@
+# API Keys and Environment Variables
+.env
+
+# Large Model Files (Vosk & Piper)
+vosk_model/
+piper/
+*.onnx
+*.json
+
+# Audio Files
+*.wav
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+.venv/
