@@ -57,6 +57,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-# Install Python dependencies
+## Install Python dependencies
 ```bash
 pip install python-dotenv requests sounddevice soundfile vosk
+
