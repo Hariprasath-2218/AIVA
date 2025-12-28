@@ -147,16 +147,71 @@ def ask_online_llm(prompt):
 # =========================
 # OFFLINE LLM (OLLAMA)
 # =========================
-def ask_ollama(prompt):
+# def ask_ollama(prompt):
+#     """
+#     Sends a prompt to the local Ollama model for offline responses.
+#     Includes a system prompt to guide the AI as an educational assistant.
+#     """
+#     try:
+#         # System prompt: instructs the model to behave as an educational robot
+#         system_prompt = (
+#             "You are AIVA, an AI-powered educational robot. "
+#             "Help students understand topics clearly, provide explanations, "
+#             "and support learning in a friendly manner."
+#             # "You are AIVA, a helpful robot assistant for students. Keep your answers very short, simple, and conversational (maximum 2 to 3 lines). Avoid using bold or special characters."
+#         )
+
+#         # Combine system prompt and user input into a single prompt string
+#         full_prompt = f"{system_prompt}\n\nStudent: {prompt}\nAIVA:"
+
+#         r = requests.post(
+#             "http://localhost:11434/api/generate",
+#             json={
+#                 "model": OLLAMA_MODEL,
+#                 "prompt": full_prompt,
+#                 "stream": False
+#             },
+#             timeout=30
+#         )
+
+#         # Return the model's response
+#         return r.json().get("response", "").strip()
+
+#     except Exception as e:
+#         return f"Offline model error: {e}"
+
+LLAMACPP_URL = "http://localhost:8080/completion"
+
+def ask_llamacpp(prompt):
+    """
+    Offline LLM using llama.cpp server (CORRECT FORMAT)
+    """
     try:
-        r = requests.post(
-            "http://localhost:11434/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
-            timeout=30
+        full_prompt = (
+            f"{SYSTEM_PROMPT}\n\n"
+            f"Student: {prompt}\n"
+            f"AIVA:"
         )
-        return r.json().get("response","")
+
+        payload = {
+            "prompt": full_prompt,
+            "n_predict": 120,
+            "temperature": 0.4,
+            "stop": ["Student:", "AIVA:"]
+        }
+
+        r = requests.post(
+            LLAMACPP_URL,
+            json=payload,
+            timeout=60
+        )
+        r.raise_for_status()
+
+        return r.json().get("content", "").strip()
+
     except Exception as e:
         return f"Offline model error: {e}"
+
 
 # =========================
 # TTS (PIPER)
@@ -202,7 +257,8 @@ while True:
             user_text = offline_listen()
             if user_text:
                 print("🧑 You:", user_text)
-                ai_text = ask_ollama(user_text)
+                # ai_text = ask_ollama(user_text)
+                ai_text = ask_llamacpp(user_text)
                 print("🤖 AI:", ai_text)
                 speak(ai_text)
 
